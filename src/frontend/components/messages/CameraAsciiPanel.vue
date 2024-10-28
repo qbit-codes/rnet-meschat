@@ -1,16 +1,17 @@
 <template>
-  <div class="w-full h-full bg-black relative" ref="parentRef">
+  <div class="w-full h-full bg-black relative overflow-hidden flex flex-col justify-between">
     <!-- Video Display -->
-    <div v-if="isReady && videoRef" class="relative overflow-hidden">
+    <div ref="parentRef" width="600" height="600">
+    <div v-if="isReady && videoRef">
       <VideoAscii
           :video-streaming="videoRef"
           :parent-ref="parentRef"
           :art-type="useColor ? 'ASCII' : 'ASCII_COLOR_BG_IMAGE'"
-          :chars-per-line="75"
-          :chars-per-column="60"
+          :chars-per-line="charsPerLine"
+          :chars-per-column="charsPerColumn"
           :font-color="'white'"
           :background-color="'black'"
-          :flip-y="false"
+          :flip-y="true"
           :pre-tag-ref="preTagRef"
           :on-frame-capture="isRecording ? handleFrameCapture : undefined"
       />
@@ -20,8 +21,9 @@
         {{ isReady ? 'Video stream not available.' : 'Click Initialize to start camera' }}
       </p>
     </div>
+    </div>
 
-    <div class="bg-black text-center mt-5">
+    <div class="bg-black text-center mt-5 z-50">
       <div
           v-if="isReady"
           class="text-white">
@@ -35,7 +37,13 @@
             :class="{ 'bg-red-600 hover:bg-red-700': isRecording }"
             @click="toggleRecording"
         >
-          {{ isRecording ? 'Stop Recording' : 'Start Recording' }}
+          <svg v-if="isRecording" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9.563C9 9.252 9.252 9 9.563 9h4.874c.311 0 .563.252.563.563v4.874c0 .311-.252.563-.563.563H9.564A.562.562 0 0 1 9 14.437V9.564Z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+          </svg>
         </button>
       </div>
 
@@ -46,7 +54,9 @@
          focus:ring-blue-500 focus:ring-offset-2"
           @click="initializeMediaDevices"
       >
-        Initialize Camera
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 0 1-2.25-2.25V9m12.841 9.091L16.5 19.5m-1.409-1.409c.407-.407.659-.97.659-1.591v-9a2.25 2.25 0 0 0-2.25-2.25h-9c-.621 0-1.184.252-1.591.659m12.182 12.182L2.909 5.909M1.5 4.5l1.409 1.409" />
+        </svg>
       </button>
     </div>
 
@@ -59,6 +69,7 @@ import {connect} from "extendable-media-recorder-wav-encoder";
 import {encodeWav} from "../../js/WavEncoder";
 import {saveCompressedFrames} from "../../js/Compression";
 import VideoAscii from './VideoAscii.vue'
+import {ref} from 'vue'
 
 export default {
   name: 'CameraAsciiPanel',
@@ -75,19 +86,23 @@ export default {
       isReady: false,
       isRecording: false,
       lastCaptureTime: 0,
-      preTagRef: null,
-      videoRef: undefined,
-      parentRef: null,
+      preTagRef: ref<HTMLPreElement>(null),
+      videoRef: ref<HTMLVideoElement>(null),
+      parentRef: ref<HTMLDivElement>(null),
       mediaRecorderRef: undefined,
       audioContextRef: undefined,
       audioWorkletNode: undefined,
       streamRef: undefined,
-      frameInterval: 1000 / 60, // 30 fps
-      fps: 0
+      fps: 0,
+      charsPerLine: 100,
+      charsPerColumn: 0,
     }
   },
-
+  
   methods: {
+    calculateCharsPerColumn(video) {
+      return Math.round(this.charsPerLine * (video.videoHeight / video.videoWidth));
+    },
     async initializeMediaDevices() {
       try {
         await register(await connect())
@@ -108,7 +123,8 @@ export default {
         // Set up video stream
         this.videoRef.srcObject = stream
         await this.videoRef.play()
-
+        this.charsPerColumn = this.calculateCharsPerColumn(this.videoRef);
+ 
         // Initialize audio context and worklet
         this.audioContextRef = new (window.AudioContext || window.webkitAudioContext)({
           sampleRate: 8000
@@ -242,35 +258,18 @@ export default {
     if (this.audioContextRef && this.audioContextRef.state !== 'closed') {
       this.audioContextRef.close()
     }
+
+    if (this.mediaRecorderRef) {
+      this.mediaRecorderRef.disconnect();
+    }
+
+    if (this.videoRef) {
+      this.videoRef = null;
+    }
   }
 }
 </script>
 
 <style scoped>
-.camera-panel {
-  @apply w-full h-full bg-black flex flex-col;
-}
 
-.controls {
-  @apply flex justify-center gap-2 p-4;
-}
-
-.control-btn {
-  @apply px-4 py-2 bg-white text-white rounded-md hover:bg-gray-700
-  transition-colors duration-200 focus:outline-none focus:ring-2
-  focus:ring-blue-500 focus:ring-offset-2;
-}
-
-.control-btn.recording {
-  @apply bg-red-600 hover:bg-red-700;
-}
-
-.video-container {
-  @apply flex-1 relative;
-}
-
-.waiting-message {
-  @apply text-white text-xl text-center absolute inset-0
-  flex items-center justify-center;
-}
 </style>

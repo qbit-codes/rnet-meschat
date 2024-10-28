@@ -1,5 +1,5 @@
 <template>
-  <div class="video-ascii" :style="containerStyle">
+  <div :style="containerStyle">
     <canvas
       ref="canvasVideoBuffer"
       :width="charsPerLine"
@@ -32,6 +32,7 @@
 <script>
 import { asciiChars } from '../../js/PixelAscii'
 import { calculateAndSetFontSize, getAsciiFromImage, getAsciiFromImageColor, canvasImgToUrl } from '../../js/VideoCanvasAscii'
+import {ref} from 'vue'
 export default {
   name: 'VideoAscii',
 
@@ -41,7 +42,7 @@ export default {
       required: true
     },
     parentRef: {
-      type: Object,
+      type: ref<HTMLDivElement>(null),
       required: true
     },
     charsPerLine: {
@@ -66,7 +67,7 @@ export default {
       validator: (value) => ['ASCII', 'ASCII_COLOR', 'ASCII_COLOR_BG_IMAGE'].includes(value)
     },
     preTagRef: {
-      type: Object,
+      type: ref<HTMLPreElement>(null),
       default: null
     },
     flipY: {
@@ -153,21 +154,13 @@ export default {
 
   methods: {
     initResizeObserver() {
-      const updateFontSize = () => {
-        if (this.$refs.preTag && this.parentRef) {
-          calculateAndSetFontSize(
-            this.$refs.preTag,
-            this.charsPerLine,
-            this.charsPerColumn,
-            this.parentRef.clientWidth,
-            this.parentRef.clientHeight
-          )
-        }
-      }
+      calculateAndSetFontSize(this.$refs.preTag, this.charsPerLine, this.charsPerColumn, this.parentRef.clientWidth, this.parentRef.clientHeight)
 
-      updateFontSize()
-      this.resizeObserver = new ResizeObserver(updateFontSize)
-
+      this.resizeObserver = new ResizeObserver(entries => {
+        const {width, height} = entries[0].contentRect;
+        calculateAndSetFontSize(this.$refs.preTag, this.charsPerLine, this.charsPerColumn, width, height);
+      });
+ 
       if (this.parentRef) {
         this.resizeObserver.observe(this.parentRef)
       }

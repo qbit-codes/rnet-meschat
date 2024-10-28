@@ -30,7 +30,7 @@
         </div>
 
         <!-- Modal Content -->
-        <div class="h-[calc(100%-8rem)]">
+        <div class="h-[calc(100%-8rem)] relative overflow-hidden">
           <CameraAsciiPanel
             @recording-complete="handleRecordingComplete"
             @copied="handleCopied"
