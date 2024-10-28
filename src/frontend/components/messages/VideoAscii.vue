@@ -32,7 +32,7 @@
 <script>
 import { asciiChars } from '../../js/PixelAscii'
 import { calculateAndSetFontSize, getAsciiFromImage, getAsciiFromImageColor, canvasImgToUrl } from '../../js/VideoCanvasAscii'
-import {ref} from 'vue'
+
 export default {
   name: 'VideoAscii',
 
@@ -42,7 +42,7 @@ export default {
       required: true
     },
     parentRef: {
-      type: ref<HTMLDivElement>(null),
+      type: Object,
       required: true
     },
     charsPerLine: {
@@ -67,7 +67,7 @@ export default {
       validator: (value) => ['ASCII', 'ASCII_COLOR', 'ASCII_COLOR_BG_IMAGE'].includes(value)
     },
     preTagRef: {
-      type: ref<HTMLPreElement>(null),
+      type: Object,
       default: null
     },
     flipY: {
@@ -92,23 +92,16 @@ export default {
     return {
       asciiText: '',
       animationFrameId: 0,
-      resizeObserver: null
-    }
-  },
-
-  computed: {
-    containerStyle() {
-      return {
+      resizeObserver: null,
+      containerStyle: {
         backgroundColor: this.backgroundColor,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
         height: '100%'
-      }
-    },
-    preStyles() {
-      return {
+      },
+      preStyles: {
         backgroundColor: this.backgroundColor,
         color: this.fontColor,
         letterSpacing: `${this.lineSpacing}em`,
@@ -117,10 +110,8 @@ export default {
         overflow: 'hidden',
         margin: 0,
         padding: 0
-      }
-    },
-    preStylesWithBg() {
-      return {
+      },
+      preStylesWithBg: {
         ...this.preStyles,
         backgroundSize: '100% 100%',
         backgroundClip: 'text',
@@ -154,6 +145,7 @@ export default {
 
   methods: {
     initResizeObserver() {
+      console.log(this.parentRef);
       calculateAndSetFontSize(this.$refs.preTag, this.charsPerLine, this.charsPerColumn, this.parentRef.clientWidth, this.parentRef.clientHeight)
 
       this.resizeObserver = new ResizeObserver(entries => {

@@ -1,11 +1,11 @@
 <template>
   <div class="w-full h-full bg-black relative overflow-hidden flex flex-col justify-between">
     <!-- Video Display -->
-    <div ref="parentRef" width="600" height="600">
-    <div v-if="isReady && videoRef">
-      <VideoAscii
+    <div ref="parentRef" class="w-full h-full overflow-hidden">
+      <div v-if="isReady && videoRef">
+        <VideoAscii
           :video-streaming="videoRef"
-          :parent-ref="parentRef"
+          :parent-ref="$refs.parentRef"
           :art-type="useColor ? 'ASCII' : 'ASCII_COLOR_BG_IMAGE'"
           :chars-per-line="charsPerLine"
           :chars-per-column="charsPerColumn"
@@ -14,13 +14,13 @@
           :flip-y="true"
           :pre-tag-ref="preTagRef"
           :on-frame-capture="isRecording ? handleFrameCapture : undefined"
-      />
-    </div>
-    <div v-else>
-      <p class="text-white text-center">
-        {{ isReady ? 'Video stream not available.' : 'Click Initialize to start camera' }}
-      </p>
-    </div>
+        />
+      </div>
+      <div v-else>
+        <p class="text-white text-center">
+          {{ isReady ? 'Video stream not available.' : 'Click Initialize to start camera' }}
+        </p>
+      </div>
     </div>
 
     <div class="bg-black text-center mt-5 z-50">
@@ -69,7 +69,6 @@ import {connect} from "extendable-media-recorder-wav-encoder";
 import {encodeWav} from "../../js/WavEncoder";
 import {saveCompressedFrames} from "../../js/Compression";
 import VideoAscii from './VideoAscii.vue'
-import {ref} from 'vue'
 
 export default {
   name: 'CameraAsciiPanel',
@@ -86,13 +85,13 @@ export default {
       isReady: false,
       isRecording: false,
       lastCaptureTime: 0,
-      preTagRef: ref<HTMLPreElement>(null),
-      videoRef: ref<HTMLVideoElement>(null),
-      parentRef: ref<HTMLDivElement>(null),
-      mediaRecorderRef: undefined,
-      audioContextRef: undefined,
-      audioWorkletNode: undefined,
-      streamRef: undefined,
+      preTagRef: null,
+      videoRef: null,
+      parentRef: null,
+      mediaRecorderRef: null,
+      audioContextRef: null,
+      audioWorkletNode: null,
+      streamRef: null,
       fps: 0,
       charsPerLine: 100,
       charsPerColumn: 0,
@@ -103,6 +102,7 @@ export default {
     calculateCharsPerColumn(video) {
       return Math.round(this.charsPerLine * (video.videoHeight / video.videoWidth));
     },
+
     async initializeMediaDevices() {
       try {
         await register(await connect())
@@ -235,15 +235,6 @@ export default {
         }
       }
     },
-
-    async copyToClipboard(text) {
-      try {
-        await navigator.clipboard.writeText(text)
-        this.$emit('copied')
-      } catch (err) {
-        console.error('Failed to copy text:', err)
-      }
-    }
   },
 
   beforeUnmount() {
