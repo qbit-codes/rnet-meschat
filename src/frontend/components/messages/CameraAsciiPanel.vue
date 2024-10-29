@@ -64,8 +64,7 @@
 </template>
 
 <script>
-import {MediaRecorder, register} from "extendable-media-recorder";
-import {connect} from "extendable-media-recorder-wav-encoder";
+import {MediaRecorder} from 'extendable-media-recorder';
 import {encodeWav} from "../../js/WavEncoder";
 import {saveCompressedFrames} from "../../js/Compression";
 import VideoAscii from './VideoAscii.vue'
@@ -105,7 +104,6 @@ export default {
 
     async initializeMediaDevices() {
       try {
-        await register(await connect())
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
@@ -124,7 +122,7 @@ export default {
         this.videoRef.srcObject = stream
         await this.videoRef.play()
         this.charsPerColumn = this.calculateCharsPerColumn(this.videoRef);
- 
+        console.log(this.charsPerColumn); 
         // Initialize audio context and worklet
         this.audioContextRef = new (window.AudioContext || window.webkitAudioContext)({
           sampleRate: 8000

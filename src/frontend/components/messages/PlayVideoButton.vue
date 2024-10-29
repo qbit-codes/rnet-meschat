@@ -53,7 +53,7 @@ export default {
             <span class="text-2xl">&times;</span>
           </button>
         </div>
-        <div class="h-[calc(100%-8rem)]">
+        <div class="h-[calc(100%-8rem)] relative overflow-hidden">
           <TextAsciiPanel v-if="isModalOpen"
                           :compressed-frames="compressedFrames"
                           :compressed-audio="compressedAudio"

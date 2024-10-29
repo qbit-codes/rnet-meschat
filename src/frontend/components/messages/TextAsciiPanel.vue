@@ -1,22 +1,24 @@
 <template>
-  <div class="w-full h-full bg-black relative" data-testid="camera-ascii-test" ref="parentRef">
-    <div v-if="currentFrame" class="relative">
-      <VideoAsciiFromAscii
+  <div class="w-full h-full bg-black relative overlflow-hidden flex flex-col justify-between">
+    <div ref="parentRef" class="w-full h-full overflow-hidden">
+      <div v-if="currentFrame">
+        <VideoAsciiFromAscii
           :text="currentFrame"
-          :parent-ref="parentRef"
+          :parent-ref="$refs.parentRef"
           :art-type="useColor ? 'ASCII' : 'ASCII_COLOR_BG_IMAGE'"
           :chars-per-line="charsPerLine"
           :chars-per-column="charsPerColumn"
-          font-color="white"
-          background-color="black"
-          :flip-y="false"
+          :font-color="'white'"
+          :background-color="'black'"
+          :flip-y="true"
           :pre-tag-ref="preTagRef"
-      />
+        />
+      </div>
+      <p v-else class="text-white text-center">
+        There is no video found to play!
+      </p>
     </div>
-    <p v-else class="text-white text-center">
-      There is no video found to play!
-    </p>
-    <div>
+    <div class="mt-5">
       <div class="flex w-full absolute bottom-0 text-center items-center justify-center z-50">
         <button @click="handlePlayPause">
           <svg v-if="isPlaying" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -53,8 +55,8 @@ export default {
   },
   data() {
     return {
-      charsPerLine: 75,
-      charsPerColumn: 60,
+      charsPerLine: 100,
+      charsPerColumn: 56,
       useColor: true,
       frames: [],
       currentFrameIndex: 0,
@@ -76,7 +78,7 @@ export default {
   },
   methods: {
     calculateCharsPerColumn() {
-      return Math.round(this.charsPerLine * (480 / 640));
+      return Math.round(this.charsPerLine * 75);
     },
     base64ToArrayBuffer: function (base64) {
       return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
@@ -133,7 +135,7 @@ export default {
     async loadInitialData() {
       console.log('Loading initial data');
       const loadedFrames = this.compressedFrames;
-      const loadedAudio = this.compressedAudio;
+      let loadedAudio = this.compressedAudio;
       if (loadedFrames) {
         this.frames = loadCompressedFrames(new Uint8Array(loadedFrames));
       }

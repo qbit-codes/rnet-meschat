@@ -77,8 +77,6 @@
 <script>
 import {
   calculateAndSetFontSize,
-  lineHeight,
-  lineSpacing
 } from '../../js/VideoCanvasAscii';
 
 const ArtTypes = {
@@ -129,14 +127,22 @@ export default {
     flipY: {
       type: Boolean,
       default: false
+    },
+    lineHeight: {
+      type: Number,
+      default: 1.2
+    },
+    lineSpacing: {
+      type: Number,
+      default: 0
     }
   },
 
   data() {
     return {
       asciiText: '',
-      lineHeight,
-      lineSpacing,
+      animationFrameId: 0,
+      resizeObserver: null,
       ArtTypes
     };
   },
@@ -153,11 +159,11 @@ export default {
 
   methods: {
     setupResizeObserver() {
-      this.calculateFontSize();
+      calculateAndSetFontSize(this.$refs.preTag, this.charsPerLine, this.charsPerColumn, this.parentRef.clientWidth, this.parentRef.clientHeight)
 
       this.resizeObserver = new ResizeObserver(entries => {
-        const { width, height } = entries[0].contentRect;
-        this.calculateFontSize(width, height);
+        const {width, height} = entries[0].contentRect;
+        calculateAndSetFontSize(this.$refs.preTag, this.charsPerLine, this.charsPerColumn, width, height);
       });
 
       if (this.parentRef) {
@@ -171,23 +177,23 @@ export default {
       }
     },
 
-    calculateFontSize(width, height) {
-      calculateAndSetFontSize(
-        this.$refs.preTag,
-        this.charsPerLine,
-        this.charsPerColumn,
-        width || this.parentRef.clientWidth,
-        height || this.parentRef.clientHeight
-      );
+    updateAscii() {
+      const canvas = this.$refs.canvasVideoBuffer
+      if (!canvas) return
+
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) return
+
+      context.drawImage(this.text, 0, 0, canvas.width, canvas.height)
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+      
+      this.asciiText = this.text;
+
+      this.animationFrameId = requestAnimationFrame(this.updateAscii);
     },
 
     startAnimation() {
-      const updateAscii = () => {
-        this.asciiText = this.text;
-        this.animationFrameId = requestAnimationFrame(updateAscii);
-      };
-
-      updateAscii();
+      this.updateAscii();
     },
 
     stopAnimation() {

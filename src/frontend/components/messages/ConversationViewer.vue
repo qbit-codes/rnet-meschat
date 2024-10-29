@@ -384,7 +384,7 @@
                     <div>
                       <PlayVideoButton
                           :compressed-frames="newMessageVideo.video_blob"
-                          :compressed-audio="newMessageVideo.audio_blob"/>
+                          :compressed-audio="base64ToArrayBuffer(newMessageVideo.audio_preview)"/>
                     </div>
 
                     <!-- encoded file size -->
@@ -645,13 +645,14 @@ export default {
       // Stop playback if it's running
       this.stopPlayback()
     },
-    handleRecordingComplete({frames, audio}) {
+    async handleRecordingComplete({frames, audio}) {
       console.log(`Recording complete: ${frames.length} frames captured`)
       this.recordedFrames = frames
       this.currentFrame = 0
       this.newMessageVideo = {
         audio_blob: new Blob([audio]),
         video_blob: frames,
+        audio_preview: Utils.arrayBufferToBase64(await new Blob([audio]).arrayBuffer()),
       };
     },
     playRecording() {
@@ -1307,12 +1308,6 @@ export default {
         var videoTotalSize = 0;
         if (this.newMessageVideo) {
           videoTotalSize = this.newMessageVideo.size;
-          const videoBytes = Utils.arrayBufferToBase64(this.newMessageVideo.video_blob.buffer);
-          const audioBytes = Utils.arrayBufferToBase64(await this.newMessageVideo.audio_blob.arrayBuffer());
-          console.log('videoBytes:', videoBytes);
-          console.log('audioBytes:', audioBytes);
-          localStorage.setItem('video', Utils.arrayBufferToBase64(this.newMessageVideo.video_blob.buffer));
-          localStorage.setItem('audio', Utils.arrayBufferToBase64(await this.newMessageVideo.audio_blob.arrayBuffer()));
           fields["video"] = {
             "audio_bytes": Utils.arrayBufferToBase64(await this.newMessageVideo.audio_blob.arrayBuffer()),
             "video_bytes": Utils.arrayBufferToBase64(this.newMessageVideo.video_blob.buffer),
