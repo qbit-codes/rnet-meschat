@@ -8,7 +8,7 @@
           :art-type="useColor ? 'ASCII' : 'ASCII_COLOR_BG_IMAGE'"
           :chars-per-line="charsPerLine"
           :chars-per-column="charsPerColumn"
-          :font-color="'white'"
+          :font-color="'#b88402'"
           :background-color="'black'"
           :flip-y="false"
           :pre-tag-ref="preTagRef"
@@ -55,8 +55,8 @@ export default {
   },
   data() {
     return {
-      charsPerLine: 100,
-      charsPerColumn: 56,
+      charsPerLine: 75,
+      charsPerColumn: 42,
       useColor: true,
       frames: [],
       currentFrameIndex: 0,

@@ -9,7 +9,7 @@
           :art-type="useColor ? 'ASCII' : 'ASCII_COLOR_BG_IMAGE'"
           :chars-per-line="charsPerLine"
           :chars-per-column="charsPerColumn"
-          :font-color="'white'"
+          :font-color="'#b88402'"
           :background-color="'black'"
           :flip-y="false"
           :pre-tag-ref="preTagRef"
@@ -101,14 +101,14 @@ export default {
       streamRef: null,
       frameInterval: 1000 / 15,
       fps: 0,
-      charsPerLine: 100,
+      charsPerLine: 75,
       charsPerColumn: 0,
     }
   },
   
   methods: {
     calculateCharsPerColumn(video) {
-      return 56; 
+      return 50; 
       //return Math.round(this.charsPerLine * (video.videoWidth / video.videoHeight));
     },
 

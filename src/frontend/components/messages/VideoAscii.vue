@@ -80,7 +80,7 @@ export default {
     },
     lineHeight: {
       type: Number,
-      default: 1.2
+      default: 0.7
     },
     lineSpacing: {
       type: Number,
