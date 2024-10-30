@@ -53,7 +53,7 @@
         </button>
       </div>
       
-      <div v-else class="text-center w-full mb-4">
+      <div v-else class="text-center">
       <button
           class="px-4 py-2 bg-white text-black mx-auto flex items-center rounded-md gap-2 hover:bg-gray-700
          transition-colors duration-200 focus:outline-none focus:ring-2
@@ -136,18 +136,8 @@ export default {
         this.videoRef.srcObject = stream
         await this.videoRef.play()
         this.charsPerColumn = this.calculateCharsPerColumn(this.videoRef);
-        console.log(this.charsPerColumn); 
+        
         // Initialize audio context and worklet
-        this.audioContextRef = new (window.AudioContext || window.webkitAudioContext)({
-          sampleRate: 8000
-        })
-
-        await this.audioContextRef.audioWorklet.addModule('assets/js/codec2-emscripten/processor.js')
-        this.audioWorkletNode = new AudioWorkletNode(this.audioContextRef, 'audio-processor')
-
-        // Connect audio nodes
-        const sourceNode = this.audioContextRef.createMediaStreamSource(stream)
-        sourceNode.connect(this.audioWorkletNode)
 
         this.isReady = true
       } catch (err) {
@@ -155,7 +145,7 @@ export default {
       }
     },
 
-    startRecording() {
+    async startRecording() {
       if (!this.streamRef || this.isRecording) return
 
       // Initialize MediaRecorder
@@ -167,13 +157,29 @@ export default {
       this.frames = []
 
       // Set up audio processing
+      this.audioContextRef = new (window.AudioContext || window.webkitAudioContext)({
+        sampleRate: 8000
+      })
+      
+      await this.audioContextRef.audioWorklet.addModule('assets/js/codec2-emscripten/processor.js')
+      this.audioWorkletNode = new AudioWorkletNode(this.audioContextRef, 'audio-processor')
+
       if (this.audioWorkletNode) {
         this.audioWorkletNode.port.onmessage = async event => {
           this.audioChunks.push(event.data)
         }
       }
-
+      
+      // Connect audio nodes
+      const sourceNode = this.audioContextRef.createMediaStreamSource(this.streamRef)
+      sourceNode.connect(this.audioWorkletNode)
+      
       try {
+        if (this.audioWorkletNode && this.isRecording) {
+          this.audioWorkletNode.port.onmessage = async event => {
+            this.audioChunks.push(event.data)
+          }
+        }
         mediaRecorder.start()
         this.isRecording = true
         this.lastCaptureTime = performance.now()
