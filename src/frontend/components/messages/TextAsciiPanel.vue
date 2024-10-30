@@ -10,7 +10,7 @@
           :chars-per-column="charsPerColumn"
           :font-color="'white'"
           :background-color="'black'"
-          :flip-y="true"
+          :flip-y="false"
           :pre-tag-ref="preTagRef"
         />
       </div>

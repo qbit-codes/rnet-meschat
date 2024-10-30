@@ -11,7 +11,7 @@
           :chars-per-column="charsPerColumn"
           :font-color="'white'"
           :background-color="'black'"
-          :flip-y="true"
+          :flip-y="false"
           :pre-tag-ref="preTagRef"
           :on-frame-capture="isRecording ? handleFrameCapture : undefined"
         />
@@ -101,14 +101,15 @@ export default {
       streamRef: null,
       frameInterval: 1000 / 15,
       fps: 0,
-      charsPerLine: 75,
+      charsPerLine: 100,
       charsPerColumn: 0,
     }
   },
   
   methods: {
     calculateCharsPerColumn(video) {
-      return Math.round(this.charsPerLine * (video.videoHeight / video.videoWidth));
+      return 56; 
+      //return Math.round(this.charsPerLine * (video.videoWidth / video.videoHeight));
     },
 
     async initializeMediaDevices() {
