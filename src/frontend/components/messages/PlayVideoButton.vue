@@ -32,6 +32,7 @@ export default {
 
 <template>
   <div class="inline-flex rounded-md shadow-sm">
+    
     <button
         type="button"
         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -46,6 +47,9 @@ export default {
     >
       <div class="bg-black rounded-lg w-full max-w-4xl h-[80vh] overflow-hidden">
         <div class="flex justify-between items-center p-4 border-b border-gray-700">
+          <div>
+            
+          </div>
           <button
               @click="closeModal"
               class="text-gray-400 hover:text-white"

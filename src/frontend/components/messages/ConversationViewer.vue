@@ -389,8 +389,7 @@
 
                     <!-- encoded file size -->
                     <div class="my-auto px-1 text-sm text-gray-500">
-                      {{ formatBytes(getVideoBlob(newMessageVideo.video_blob).size) }}
-                      {{ formatBytes(newMessageVideo.audio_blob.size) }}
+                      {{ formatBytes(getVideoBlob(newMessageVideo.video_blob).size + newMessageVideo.audio_blob.size) }}
                     </div>
 
                   </div>

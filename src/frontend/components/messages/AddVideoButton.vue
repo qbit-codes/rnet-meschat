@@ -36,16 +36,6 @@
             @copied="handleCopied"
           />
         </div>
-
-        <!-- Modal Footer -->
-        <div class="flex justify-end gap-2 p-4 border-t border-gray-700">
-          <button
-            @click="closeModal"
-            class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
-          >
-            Save
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -80,6 +70,7 @@ export default {
 
     handleRecordingComplete({ frames, audio }) {
       this.$emit('recording-complete', { frames, audio })
+      this.closeModal();
     },
 
     handleCopied() {

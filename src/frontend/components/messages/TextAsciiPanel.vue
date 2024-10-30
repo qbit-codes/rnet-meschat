@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full h-full bg-black relative overlflow-hidden flex flex-col justify-between">
-    <div ref="parentRef" class="w-full h-full overflow-hidden">
+  <div class="w-full h-full bg-black relative overlflow-hidden flex flex-col gap-5 justify-between">
+    <div ref="parentRef" class="w-full h-full overflow-hidden mt-5">
       <div v-if="currentFrame">
         <VideoAsciiFromAscii
           :text="currentFrame"
@@ -18,13 +18,13 @@
         There is no video found to play!
       </p>
     </div>
-    <div class="mt-5">
-      <div class="flex w-full absolute bottom-0 text-center items-center justify-center z-50">
+    <div class="mb-5">
+      <div class="flex w-full absolute bottom-0 text-center items-center justify-center z-50 text-white">
         <button @click="handlePlayPause">
           <svg v-if="isPlaying" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
           </svg>
         </button>
@@ -61,7 +61,6 @@ export default {
       frames: [],
       currentFrameIndex: 0,
       isPlaying: false,
-      fps: 25,
       audio: undefined,
       audioDuration: undefined,
       decoded: undefined,
@@ -97,13 +96,6 @@ export default {
     },
     setupAudioPlayback() {
       if (this.isPlaying && this.audio && this.audioDuration) {
-        const frameTime = this.audioDuration / this.frames.length;
-        const targetTime = frameTime * this.currentFrameIndex;
-
-        if (isFinite(targetTime) && targetTime >= 0 && targetTime <= this.audioDuration) {
-          this.audio.currentTime = targetTime;
-        }
-
         this.audio.play().catch(e => {
           console.error('Error playing audio:', e);
         });
@@ -115,16 +107,7 @@ export default {
       if (this.isPlaying && this.frames.length > 0) {
         this.animationInterval = setInterval(() => {
           this.currentFrameIndex = (this.currentFrameIndex + 1) % this.frames.length;
-
-          if (this.audio && this.audioDuration) {
-            const frameTime = this.audioDuration / this.frames.length;
-            const targetTime = frameTime * this.currentFrameIndex;
-
-            if (isFinite(targetTime) && targetTime >= 0 && targetTime <= this.audioDuration) {
-              this.audio.currentTime = targetTime;
-            }
-          }
-        }, 1000 / this.fps);
+        }, (this.audioDuration * 1000) / this.frames.length);
       }
     },
     stopAnimation() {
@@ -138,6 +121,7 @@ export default {
       let loadedAudio = this.compressedAudio;
       if (loadedFrames) {
         this.frames = loadCompressedFrames(new Uint8Array(loadedFrames));
+        this.currentFrameIndex = 0;
       }
 
       try {
